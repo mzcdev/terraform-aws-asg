@@ -45,19 +45,21 @@ resource "aws_autoscaling_group" "worker" {
 
   launch_configuration = aws_launch_configuration.worker[0].id
 
-  tags = concat(
-    [
-      {
-        key                 = "asg:lifecycle"
-        value               = "normal"
-        propagate_at_launch = true
-      },
-      # {
-      #   key                 = "asg:az"
-      #   value               = var.launch_each_subnet ? var.subnet_azs[count.index] : "-"
-      #   propagate_at_launch = true
-      # },
-    ],
-    local.worker_tags,
-  )
+  tags = var.tags
+
+  # tags = concat(
+  #   [
+  #     {
+  #       key                 = "asg:lifecycle"
+  #       value               = "normal"
+  #       propagate_at_launch = true
+  #     },
+  #     # {
+  #     #   key                 = "asg:az"
+  #     #   value               = var.launch_each_subnet ? var.subnet_azs[count.index] : "-"
+  #     #   propagate_at_launch = true
+  #     # },
+  #   ],
+  #   local.worker_tags,
+  # )
 }
