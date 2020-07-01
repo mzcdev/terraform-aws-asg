@@ -3,7 +3,8 @@
 resource "aws_launch_configuration" "worker" {
   count = var.launch_configuration_enable ? 1 : 0
 
-  name_prefix          = "${var.name}-"
+  name_prefix = "${var.name}-"
+
   image_id             = var.ami_id != "" ? var.ami_id : data.aws_ami.worker.id
   instance_type        = var.instance_type
   iam_instance_profile = aws_iam_instance_profile.worker.name
@@ -36,7 +37,7 @@ resource "aws_launch_configuration" "worker" {
 resource "aws_autoscaling_group" "worker" {
   count = var.launch_configuration_enable ? local.asg_count : 0
 
-  name = var.launch_each_subnet ? "${var.name}-${count.index + 1}" : var.name
+  name_prefix = "${var.name}-"
 
   min_size = var.min
   max_size = var.max
@@ -45,7 +46,12 @@ resource "aws_autoscaling_group" "worker" {
 
   launch_configuration = aws_launch_configuration.worker[0].id
 
-  tags = var.tags
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes        = [desired_capacity]
+  }
+
+  tags = local.tags
 
   # tags = concat(
   #   [
@@ -60,6 +66,6 @@ resource "aws_autoscaling_group" "worker" {
   #     #   propagate_at_launch = true
   #     # },
   #   ],
-  #   local.worker_tags,
+  #   local.tags,
   # )
 }
